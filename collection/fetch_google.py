@@ -95,7 +95,7 @@ def fetch_la_data():
     all_places = {}
 
     for neighborhood, coords in LA_NEIGHBORHOODS.items():
-        print(f"\n📍 Fetching: {neighborhood}")
+        print(f"\n Fetching: {neighborhood}")
 
         for place_type in PLACE_TYPES:
             print(f"  → type: {place_type}")
@@ -125,4 +125,4 @@ if __name__ == "__main__":
     with open(output_path, "w") as f:
         json.dump(places, f, indent=2, ensure_ascii=False)
 
-    print(f"\n✅ Done. {len(places)} places saved to {output_path}")
+    print(f"\n Done. {len(places)} places saved to {output_path}")
