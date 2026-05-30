@@ -50,6 +50,7 @@ def load_google_places(path: Path = RAW_PATH):
             except (TypeError, ValueError):
                 price_level = None
 
+        opening_hours = raw.get("opening_hours") or {}
         places.append({
             "id": raw.get("place_id"),
             "source": "google",
@@ -59,6 +60,9 @@ def load_google_places(path: Path = RAW_PATH):
             "price_level": price_level,
             "user_rating_google": raw.get("rating"),
             "user_rating_yelp": None,
+            "review_count": raw.get("user_ratings_total"),
+            "is_open": opening_hours.get("open_now"),
+            "hours_periods": opening_hours.get("periods"),
             "latitude": lat,
             "longitude": lng,
             "detail_url": f"https://www.google.com/maps/place/?q=place_id:{raw.get('place_id')}",

@@ -81,6 +81,7 @@ def load_yelp_places(base_dir: Path = RAW_DIR):
                 business.get("location", {}).get("state"),
             ]))
 
+            is_closed = business.get("is_closed")
             places.append({
                 "id": business.get("id"),
                 "source": "yelp",
@@ -90,6 +91,8 @@ def load_yelp_places(base_dir: Path = RAW_DIR):
                 "price_level": price_level,
                 "user_rating_google": None,
                 "user_rating_yelp": business.get("rating"),
+                "review_count": business.get("review_count"),
+                "is_open": (not is_closed) if is_closed is not None else None,
                 "latitude": lat,
                 "longitude": lng,
                 "detail_url": business.get("url"),

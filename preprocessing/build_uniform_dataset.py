@@ -85,6 +85,9 @@ def normalize_place(place, metro_stops):
         "user_rating_google": place.get("user_rating_google"),
         "user_rating_yelp": place.get("user_rating_yelp"),
         "avg_user_rating": avg_rating,
+        "review_count": place.get("review_count"),
+        "is_open": place.get("is_open"),
+        "hours_periods": place.get("hours_periods"),
         "latitude": lat,
         "longitude": lng,
         "nearest_metro_station_name": nearest.get("stop_name") if nearest else None,
@@ -122,21 +125,93 @@ def location_to_coords(location):
     return LOCATION_ALIASES.get(key, UCLA_COORDS)
 
 
-def recommend(places, place_type=None, price_level=None, location=None, top_n=10):
+def recommend(
+    places,
+    place_type=None,
+    min_price=None,
+    max_price=None,
+    min_rating=None,
+    location=None,
+    max_distance_m=None,
+    only_open=False,
+    top_n=10,
+    rating_weight=0.5,
+    distance_weight=0.4,
+    metro_weight=0.1,
+):
+    """
+    Score and rank places using a weighted blend of rating, distance, and metro proximity.
+
+    Scoring (all components normalized 0–1):
+      score = rating_weight  * (rating/5 * review_confidence)
+            + distance_weight * (1 - dist / max_dist_in_candidates)
+            + metro_weight    * (1 - metro_dist / max_metro_dist_in_candidates)
+
+    review_confidence dampens ratings from very few reviews:
+      min(1, log1p(review_count) / log1p(200))
+
+    Weights must sum to 1 for a clean 0–1 score; if they don't, scores are still
+    comparable within a single call.
+
+    Filters (hard cutoffs applied before scoring):
+      place_type     — exact match
+      min_price      — price_level >= min_price (None = no lower bound)
+      max_price      — price_level <= max_price (None = no upper bound)
+      min_rating     — avg_user_rating >= min_rating
+      max_distance_m — walking distance from location
+      only_open      — drop places where is_open is explicitly False
+    """
     user_lat, user_lng = location_to_coords(location)
     candidates = []
 
     for place in places:
         if place_type and place.get("place_type") != place_type:
             continue
-        if price_level is not None and place.get("price_level") != price_level:
+
+        pl = place.get("price_level")
+        if min_price is not None and (pl is None or pl < min_price):
+            continue
+        if max_price is not None and (pl is None or pl > max_price):
+            continue
+
+        rating = place.get("avg_user_rating")
+        if min_rating is not None and (rating is None or rating < min_rating):
+            continue
+
+        if only_open and place.get("is_open") is False:
             continue
 
         dist = haversine(user_lat, user_lng, place["latitude"], place["longitude"])
+        if max_distance_m is not None and dist > max_distance_m:
+            continue
+
         candidates.append({**place, "user_distance_meters": dist})
 
-    # Sort by distance first, break ties by rating descending
-    candidates.sort(key=lambda r: (r["user_distance_meters"], -(r.get("avg_user_rating") or 0)))
+    if not candidates:
+        return []
+
+    max_dist = max(c["user_distance_meters"] for c in candidates) or 1.0
+    max_metro = max((c.get("nearest_metro_distance_meters") or 0) for c in candidates) or 1.0
+
+    for c in candidates:
+        rating = c.get("avg_user_rating") or 0
+        review_count = c.get("review_count") or 0
+        confidence = min(1.0, math.log1p(review_count) / math.log1p(200))
+        rating_score = (rating / 5.0) * confidence
+
+        dist_score = 1.0 - (c["user_distance_meters"] / max_dist)
+
+        metro_dist = c.get("nearest_metro_distance_meters")
+        metro_score = (1.0 - (metro_dist / max_metro)) if metro_dist is not None else 0.5
+
+        c["recommendation_score"] = round(
+            rating_weight * rating_score
+            + distance_weight * dist_score
+            + metro_weight * metro_score,
+            4,
+        )
+
+    candidates.sort(key=lambda c: -c["recommendation_score"])
     return candidates[:top_n]
 
 
@@ -271,10 +346,11 @@ if __name__ == "__main__":
     print(f"Saved {len(unified)} places → {json_path} and {csv_path}")
 
     # Sample single-type recommendation
-    print("\n--- Sample: top 5 restaurants near UCLA, price level 2 ---")
-    recs = recommend(unified, place_type="restaurant", price_level=2, location="ucla", top_n=5)
+    print("\n--- Sample: top 5 restaurants near UCLA, price $–$$ ---")
+    recs = recommend(unified, place_type="restaurant", min_price=1, max_price=2, location="ucla", top_n=5)
     for r in recs:
-        print(f"  {r['name']} | rating={r['avg_user_rating']} | price={r['price_level']} "
+        print(f"  {r['name']} | score={r['recommendation_score']} | rating={r['avg_user_rating']} "
+              f"| reviews={r['review_count']} | price={r['price_level']} "
               f"| metro={r['nearest_metro_station_name']} ({r['nearest_metro_distance_meters']} m)")
 
     # Sample itinerary
