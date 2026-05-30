@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ucla-blue: #2774AE;
+  --ucla-blue-dark: #003B5C;
+  --ucla-gold: #FFD100;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+input[type="range"] {
+  accent-color: var(--ucla-blue);
+}
+
+input[type="time"] {
+  color-scheme: light;
+}
