@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
-import L from "leaflet";
+import { useEffect, useRef } from "react";
+import type L from "leaflet";
 import { ItineraryStop } from "@/lib/types";
 
 const TYPE_COLORS: Record<string, string> = {
@@ -17,37 +16,8 @@ const TYPE_COLORS: Record<string, string> = {
   night_club:  "#6366f1",
 };
 
-function numberedIcon(n: number, color: string) {
-  return L.divIcon({
-    html: `<div style="background:${color};color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35)">${n}</div>`,
-    className: "",
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -18],
-  });
-}
-
-function startIcon() {
-  return L.divIcon({
-    html: `<div style="background:#003B5C;color:#FFD100;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35)">🐻</div>`,
-    className: "",
-    iconSize: [34, 34],
-    iconAnchor: [17, 17],
-    popupAnchor: [0, -20],
-  });
-}
-
-function AutoFit({ stops, center }: { stops: ItineraryStop[]; center: [number, number] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (stops.length > 0) {
-      const latlngs: [number, number][] = [center, ...stops.map(s => [s.latitude, s.longitude] as [number, number])];
-      map.fitBounds(L.latLngBounds(latlngs), { padding: [48, 48], maxZoom: 15 });
-    } else {
-      map.setView(center, 13);
-    }
-  }, [stops, center, map]);
-  return null;
+function numberedHtml(n: number, color: string) {
+  return `<div style="background:${color};color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-family:sans-serif">${n}</div>`;
 }
 
 interface Props {
@@ -56,46 +26,97 @@ interface Props {
 }
 
 export default function MapView({ center, stops }: Props) {
-  const routePoints: [number, number][] = [center, ...stops.map(s => [s.latitude, s.longitude] as [number, number])];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef       = useRef<L.Map | null>(null);
+  const layersRef    = useRef<L.Layer[]>([]);
 
-  return (
-    <MapContainer
-      center={center}
-      zoom={13}
-      style={{ height: "100%", width: "100%" }}
-      zoomControl={false}
-    >
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-      />
+  // Initialise map once
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
 
-      {/* Dashed route line */}
-      {stops.length > 0 && (
-        <Polyline positions={routePoints} color="#2774AE" weight={2.5} dashArray="6 9" opacity={0.75} />
-      )}
+    import("leaflet").then((L) => {
+      if (!containerRef.current || mapRef.current) return;
 
-      {/* Start pin */}
-      <Marker position={center} icon={startIcon()}>
-        <Popup><span className="font-semibold">Starting point</span></Popup>
-      </Marker>
+      const map = L.map(containerRef.current, {
+        center,
+        zoom: 13,
+        zoomControl: true,
+      });
 
-      {/* Stop markers */}
-      {stops.map(stop => (
-        <Marker
-          key={stop.stop_number}
-          position={[stop.latitude, stop.longitude]}
-          icon={numberedIcon(stop.stop_number, TYPE_COLORS[stop.place_type] ?? "#2774AE")}
-        >
-          <Popup>
-            <p className="font-bold text-sm leading-tight mb-0.5">{stop.name}</p>
-            <p className="text-xs text-slate-500 mb-0.5">{stop.estimated_arrival} → {stop.estimated_departure}</p>
-            {stop.address && <p className="text-xs text-slate-400">{stop.address}</p>}
-          </Popup>
-        </Marker>
-      ))}
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        { attribution: "© CARTO © OSM" }
+      ).addTo(map);
 
-      <AutoFit stops={stops} center={center} />
-    </MapContainer>
-  );
+      mapRef.current = map;
+    });
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-draw markers/route whenever stops or center changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    import("leaflet").then((L) => {
+      // Remove previous dynamic layers
+      layersRef.current.forEach(l => l.remove());
+      layersRef.current = [];
+
+      const push = (l: L.Layer) => { l.addTo(map); layersRef.current.push(l); };
+
+      // Start pin (bear emoji)
+      push(
+        L.marker(center, {
+          icon: L.divIcon({
+            html: `<div style="background:#003B5C;color:#FFD100;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🐻</div>`,
+            className: "",
+            iconSize: [34, 34],
+            iconAnchor: [17, 17],
+          }),
+        }).bindPopup("<b>Starting point</b>")
+      );
+
+      if (stops.length > 0) {
+        const route: [number, number][] = [center, ...stops.map(s => [s.latitude, s.longitude] as [number, number])];
+
+        // Dashed route line
+        push(L.polyline(route, { color: "#2774AE", weight: 2.5, dashArray: "6 9", opacity: 0.7 }));
+
+        // Stop markers
+        stops.forEach(stop => {
+          const color = TYPE_COLORS[stop.place_type] ?? "#2774AE";
+          push(
+            L.marker([stop.latitude, stop.longitude], {
+              icon: L.divIcon({
+                html: numberedHtml(stop.stop_number, color),
+                className: "",
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -18],
+              }),
+            }).bindPopup(
+              `<div style="font-family:sans-serif;min-width:150px">
+                <p style="font-weight:700;margin:0 0 3px">${stop.name}</p>
+                <p style="font-size:12px;color:#64748b;margin:0 0 2px">${stop.estimated_arrival} → ${stop.estimated_departure}</p>
+                ${stop.address ? `<p style="font-size:11px;color:#94a3b8;margin:0">${stop.address}</p>` : ""}
+              </div>`
+            )
+          );
+        });
+
+        // Fit bounds
+        map.fitBounds(L.latLngBounds(route), { padding: [48, 48], maxZoom: 15 });
+      } else {
+        map.setView(center, 13);
+      }
+    });
+  }, [stops, center]);
+
+  return <div ref={containerRef} style={{ height: "100%", width: "100%" }} />;
 }
