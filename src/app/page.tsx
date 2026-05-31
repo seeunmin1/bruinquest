@@ -252,11 +252,6 @@ export default function Home() {
                 🌙 Bars and nightclubs are only scheduled after 8:00 PM
               </p>
             )}
-            {(categories.has("museum") || categories.has("art_gallery") || categories.has("park") || categories.has("attraction")) && (
-              <p className="text-xs text-sky-600 bg-sky-50 rounded-lg px-3 py-1.5 inline-flex items-center gap-1">
-                ℹ️ Museum/park/activity data requires a fresh data fetch — see README for instructions
-              </p>
-            )}
           </div>
 
           {/* Price Level */}

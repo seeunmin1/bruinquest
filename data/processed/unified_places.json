@@ -1,5 +1,513 @@
 [
   {
+    "id": "ChIJRV6-TvWzwoARqRp8PEM3eGk",
+    "source": "google",
+    "name": "Bo Bridges Gallery",
+    "address": "1108 Manhattan Ave, Manhattan Beach, CA 90266, USA",
+    "place_type": "art_gallery",
+    "price_level": null,
+    "user_rating_google": 5,
+    "user_rating_yelp": null,
+    "avg_user_rating": 5.0,
+    "review_count": 22,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 1,
+          "time": "1900"
+        },
+        "open": {
+          "day": 1,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 2,
+          "time": "1900"
+        },
+        "open": {
+          "day": 2,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 3,
+          "time": "1900"
+        },
+        "open": {
+          "day": 3,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 4,
+          "time": "1900"
+        },
+        "open": {
+          "day": 4,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 5,
+          "time": "1900"
+        },
+        "open": {
+          "day": 5,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 6,
+          "time": "1900"
+        },
+        "open": {
+          "day": 6,
+          "time": "1100"
+        }
+      }
+    ],
+    "latitude": 33.8843904,
+    "longitude": -118.4103751,
+    "nearest_metro_station_name": "Sepulveda / 8th",
+    "nearest_metro_station_id": "23200013",
+    "nearest_metro_distance_meters": 1315.5,
+    "nearest_metro_route_codes": [
+      232
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJRV6-TvWzwoARqRp8PEM3eGk"
+  },
+  {
+    "id": "ChIJn7HsQae8woARP07KjYkAhjc",
+    "source": "google",
+    "name": "FrameStore - Custom Framing Brentwood",
+    "address": "11684 San Vicente Blvd, Los Angeles, CA 90049, USA",
+    "place_type": "art_gallery",
+    "price_level": null,
+    "user_rating_google": 4.9,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.9,
+    "review_count": 256,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 0,
+          "time": "1800"
+        },
+        "open": {
+          "day": 0,
+          "time": "1000"
+        }
+      },
+      {
+        "close": {
+          "day": 1,
+          "time": "1900"
+        },
+        "open": {
+          "day": 1,
+          "time": "1000"
+        }
+      },
+      {
+        "close": {
+          "day": 2,
+          "time": "1900"
+        },
+        "open": {
+          "day": 2,
+          "time": "1000"
+        }
+      },
+      {
+        "close": {
+          "day": 3,
+          "time": "1900"
+        },
+        "open": {
+          "day": 3,
+          "time": "1000"
+        }
+      },
+      {
+        "close": {
+          "day": 4,
+          "time": "1900"
+        },
+        "open": {
+          "day": 4,
+          "time": "1000"
+        }
+      },
+      {
+        "close": {
+          "day": 5,
+          "time": "1900"
+        },
+        "open": {
+          "day": 5,
+          "time": "1000"
+        }
+      },
+      {
+        "close": {
+          "day": 6,
+          "time": "1800"
+        },
+        "open": {
+          "day": 6,
+          "time": "1000"
+        }
+      }
+    ],
+    "latitude": 34.0535746,
+    "longitude": -118.4647066,
+    "nearest_metro_station_name": "Wilshire / Barrington",
+    "nearest_metro_station_id": "72000002",
+    "nearest_metro_distance_meters": 562.9,
+    "nearest_metro_route_codes": [
+      720
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJn7HsQae8woARP07KjYkAhjc"
+  },
+  {
+    "id": "ChIJ7cEs7nS7woARdHcVnqEIRvc",
+    "source": "google",
+    "name": "Giant Robot Store",
+    "address": "2015 Sawtelle Blvd, Los Angeles, CA 90025, USA",
+    "place_type": "art_gallery",
+    "price_level": null,
+    "user_rating_google": 4.6,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.6,
+    "review_count": 198,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 0,
+          "time": "1800"
+        },
+        "open": {
+          "day": 0,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 2,
+          "time": "1800"
+        },
+        "open": {
+          "day": 2,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 3,
+          "time": "1800"
+        },
+        "open": {
+          "day": 3,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 4,
+          "time": "1800"
+        },
+        "open": {
+          "day": 4,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 5,
+          "time": "1800"
+        },
+        "open": {
+          "day": 5,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 6,
+          "time": "1800"
+        },
+        "open": {
+          "day": 6,
+          "time": "1200"
+        }
+      }
+    ],
+    "latitude": 34.040408,
+    "longitude": -118.443431,
+    "nearest_metro_station_name": "Nebraska / Sepulveda",
+    "nearest_metro_station_id": "1298",
+    "nearest_metro_distance_meters": 591.8,
+    "nearest_metro_route_codes": [
+      4
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJ7cEs7nS7woARdHcVnqEIRvc"
+  },
+  {
+    "id": "ChIJFYDOd3HDwoAR_DhdrBevWzE",
+    "source": "google",
+    "name": "Gold Bug",
+    "address": "38 E Holly St, Pasadena, CA 91103, USA",
+    "place_type": "art_gallery",
+    "price_level": null,
+    "user_rating_google": 4.3,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.3,
+    "review_count": 132,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 0,
+          "time": "1700"
+        },
+        "open": {
+          "day": 0,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 1,
+          "time": "1700"
+        },
+        "open": {
+          "day": 1,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 4,
+          "time": "1700"
+        },
+        "open": {
+          "day": 4,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 5,
+          "time": "1700"
+        },
+        "open": {
+          "day": 5,
+          "time": "1100"
+        }
+      },
+      {
+        "close": {
+          "day": 6,
+          "time": "1700"
+        },
+        "open": {
+          "day": 6,
+          "time": "1100"
+        }
+      }
+    ],
+    "latitude": 34.1474013,
+    "longitude": -118.1496303,
+    "nearest_metro_station_name": "Main / Fremont",
+    "nearest_metro_station_id": "16074",
+    "nearest_metro_distance_meters": 5781.7,
+    "nearest_metro_route_codes": [
+      78
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJFYDOd3HDwoAR_DhdrBevWzE"
+  },
+  {
+    "id": "ChIJ3xJKipS6woARMoCU9T5f1NI",
+    "source": "google",
+    "name": "Beyond Baroque",
+    "address": "681 Venice Blvd., Venice, CA 90291, USA",
+    "place_type": "attraction",
+    "price_level": null,
+    "user_rating_google": 4.7,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.7,
+    "review_count": 133,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 5,
+          "time": "1800"
+        },
+        "open": {
+          "day": 5,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 6,
+          "time": "1800"
+        },
+        "open": {
+          "day": 6,
+          "time": "1200"
+        }
+      }
+    ],
+    "latitude": 33.9913623,
+    "longitude": -118.4588369,
+    "nearest_metro_station_name": "Venice / Shell",
+    "nearest_metro_station_id": "12429",
+    "nearest_metro_distance_meters": 65.2,
+    "nearest_metro_route_codes": [
+      33
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJ3xJKipS6woARMoCU9T5f1NI"
+  },
+  {
+    "id": "ChIJvXdlhBvHwoARfS5LNYPCnEQ",
+    "source": "google",
+    "name": "826LA & The Echo Park Time Travel Mart",
+    "address": "1714 Sunset Blvd, Los Angeles, CA 90026, USA",
+    "place_type": "attraction",
+    "price_level": null,
+    "user_rating_google": 4.6,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.6,
+    "review_count": 211,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 0,
+          "time": "1800"
+        },
+        "open": {
+          "day": 0,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 1,
+          "time": "1800"
+        },
+        "open": {
+          "day": 1,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 2,
+          "time": "1800"
+        },
+        "open": {
+          "day": 2,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 3,
+          "time": "1800"
+        },
+        "open": {
+          "day": 3,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 4,
+          "time": "1800"
+        },
+        "open": {
+          "day": 4,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 5,
+          "time": "1800"
+        },
+        "open": {
+          "day": 5,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 6,
+          "time": "1800"
+        },
+        "open": {
+          "day": 6,
+          "time": "1200"
+        }
+      }
+    ],
+    "latitude": 34.0773295,
+    "longitude": -118.2590327,
+    "nearest_metro_station_name": "Sunset / Echo Park",
+    "nearest_metro_station_id": "16304",
+    "nearest_metro_distance_meters": 125.5,
+    "nearest_metro_route_codes": [
+      4
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJvXdlhBvHwoARfS5LNYPCnEQ"
+  },
+  {
+    "id": "ChIJ9WZU-sy-woARnhyvpzXXP18",
+    "source": "google",
+    "name": "Melrose Trading Post",
+    "address": "7850 Melrose Ave, Los Angeles, CA 90046, USA",
+    "place_type": "attraction",
+    "price_level": null,
+    "user_rating_google": 4.4,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.4,
+    "review_count": 1446,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 0,
+          "time": "1700"
+        },
+        "open": {
+          "day": 0,
+          "time": "1000"
+        }
+      }
+    ],
+    "latitude": 34.0833982,
+    "longitude": -118.3594799,
+    "nearest_metro_station_name": "Fairfax / Melrose",
+    "nearest_metro_station_id": "3494",
+    "nearest_metro_distance_meters": 168.8,
+    "nearest_metro_route_codes": [
+      217
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJ9WZU-sy-woARnhyvpzXXP18"
+  },
+  {
     "id": "ChIJnUhfWoC5woARmFZ-DhZrwVI",
     "source": "google",
     "name": "B Sweet Catering",
@@ -56172,6 +56680,126 @@
       78
     ],
     "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJ8_Vih9jDwoAR65elgpFh55w"
+  },
+  {
+    "id": "ChIJo4G0L4W4woARbz4mhiS79jk",
+    "source": "google",
+    "name": "The Wiltern",
+    "address": "3790 Wilshire Blvd, Los Angeles, CA 90010, USA",
+    "place_type": "night_club",
+    "price_level": 3,
+    "user_rating_google": 4.5,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.5,
+    "review_count": 4472,
+    "is_open": null,
+    "hours_periods": null,
+    "latitude": 34.061501,
+    "longitude": -118.308948,
+    "nearest_metro_station_name": "Wilshire / Western",
+    "nearest_metro_station_id": "8454",
+    "nearest_metro_distance_meters": 13.3,
+    "nearest_metro_route_codes": [
+      720
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJo4G0L4W4woARbz4mhiS79jk"
+  },
+  {
+    "id": "ChIJt1-0kze_woARkevCuYSmEOA",
+    "source": "google",
+    "name": "Hollywood Palladium",
+    "address": "6215 Sunset Blvd, Los Angeles, CA 90028, USA",
+    "place_type": "night_club",
+    "price_level": 2,
+    "user_rating_google": 4.5,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.5,
+    "review_count": 3658,
+    "is_open": false,
+    "hours_periods": [
+      {
+        "close": {
+          "day": 1,
+          "time": "1800"
+        },
+        "open": {
+          "day": 1,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 2,
+          "time": "1800"
+        },
+        "open": {
+          "day": 2,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 3,
+          "time": "1800"
+        },
+        "open": {
+          "day": 3,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 4,
+          "time": "1800"
+        },
+        "open": {
+          "day": 4,
+          "time": "1200"
+        }
+      },
+      {
+        "close": {
+          "day": 5,
+          "time": "1800"
+        },
+        "open": {
+          "day": 5,
+          "time": "1200"
+        }
+      }
+    ],
+    "latitude": 34.098496,
+    "longitude": -118.3242781,
+    "nearest_metro_station_name": "Sunset / Gower",
+    "nearest_metro_station_id": "6421",
+    "nearest_metro_distance_meters": 179.2,
+    "nearest_metro_route_codes": [
+      2
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJt1-0kze_woARkevCuYSmEOA"
+  },
+  {
+    "id": "ChIJT359ZcnHwoARlzqycZrBhdc",
+    "source": "google",
+    "name": "The Belasco",
+    "address": "1050 S Hill St, Los Angeles, CA 90015, USA",
+    "place_type": "night_club",
+    "price_level": null,
+    "user_rating_google": 4.4,
+    "user_rating_yelp": null,
+    "avg_user_rating": 4.4,
+    "review_count": 2010,
+    "is_open": null,
+    "hours_periods": null,
+    "latitude": 34.0403336,
+    "longitude": -118.2593883,
+    "nearest_metro_station_name": "Hill / 11th",
+    "nearest_metro_station_id": "5130",
+    "nearest_metro_distance_meters": 75.1,
+    "nearest_metro_route_codes": [
+      4
+    ],
+    "detail_url": "https://www.google.com/maps/place/?q=place_id:ChIJT359ZcnHwoARlzqycZrBhdc"
   },
   {
     "id": "ChIJI26_31-5woARVEA5PEDwyNc",
