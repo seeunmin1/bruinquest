@@ -8,19 +8,31 @@ GOOGLE_TYPE_PRIORITY = [
     "cafe",
     "bar",
     "bakery",
+    "museum",
+    "art_gallery",
+    "tourist_attraction",
+    "park",
+    "amusement_park",
+    "night_club",
     "meal_takeaway",
     "meal_delivery",
     "food",
 ]
+
+GOOGLE_TYPE_REMAP = {
+    "meal_takeaway": "restaurant",
+    "meal_delivery": "restaurant",
+    "food": "restaurant",
+    "amusement_park": "attraction",
+    "tourist_attraction": "attraction",
+}
 
 
 def get_google_place_type(types):
     types = [t.lower() for t in (types or []) if isinstance(t, str)]
     for preferred in GOOGLE_TYPE_PRIORITY:
         if preferred in types:
-            if preferred in {"meal_takeaway", "meal_delivery", "food"}:
-                return "restaurant"
-            return preferred
+            return GOOGLE_TYPE_REMAP.get(preferred, preferred)
     return None
 
 

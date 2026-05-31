@@ -30,8 +30,13 @@ LOCATION_ALIASES = {
 DWELL_MINUTES = {
     "restaurant": 60,
     "cafe": 30,
-    "bar": 45,
+    "bar": 90,
     "bakery": 20,
+    "museum": 90,
+    "art_gallery": 45,
+    "park": 60,
+    "attraction": 75,
+    "night_club": 120,
 }
 
 WALKING_SPEED_MPS = 1.4  # ~5 km/h

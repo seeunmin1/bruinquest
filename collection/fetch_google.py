@@ -34,7 +34,10 @@ LA_NEIGHBORHOODS = {
 }
 
 SEARCH_RADIUS = 1500
-PLACE_TYPES = ["restaurant", "cafe", "bar", "store"]
+PLACE_TYPES = [
+    "restaurant", "cafe", "bar", "bakery",
+    "museum", "tourist_attraction", "art_gallery", "park", "night_club",
+]
 
 DETAIL_FIELDS = [
     "place_id", "name", "types", "formatted_address",

@@ -10,6 +10,11 @@ const CATEGORIES = [
   { key: "cafe", label: "Cafe", icon: "☕" },
   { key: "bar", label: "Bar", icon: "🍺" },
   { key: "bakery", label: "Bakery", icon: "🥐" },
+  { key: "museum", label: "Museum", icon: "🏛️" },
+  { key: "art_gallery", label: "Art Gallery", icon: "🎨" },
+  { key: "park", label: "Park / Outdoors", icon: "🌳" },
+  { key: "attraction", label: "Activities", icon: "🎭" },
+  { key: "night_club", label: "Nightclub", icon: "🎵" },
 ];
 
 const PRICE_LABELS: Record<number, string> = { 1: "$", 2: "$$", 3: "$$$", 4: "$$$$" };
@@ -19,6 +24,11 @@ const PLACE_ICONS: Record<string, string> = {
   cafe: "☕",
   bar: "🍺",
   bakery: "🥐",
+  museum: "🏛️",
+  art_gallery: "🎨",
+  park: "🌳",
+  attraction: "🎭",
+  night_club: "🎵",
 };
 
 function StarRating({ rating }: { rating: number | null }) {
@@ -69,6 +79,7 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState<ItineraryStop[] | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function toggleCategory(key: string) {
@@ -98,6 +109,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setItinerary(null);
+    setSummary(null);
 
     try {
       const res = await fetch("/api/itinerary", {
@@ -117,6 +129,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
       setItinerary(data.itinerary);
+      setSummary(data.summary ?? null);
       if (data.itinerary.length === 0) {
         setError("No places found matching your criteria. Try adjusting your filters.");
       }
@@ -234,9 +247,14 @@ export default function Home() {
                 );
               })}
             </div>
-            {categories.has("bar") && (
+            {(categories.has("bar") || categories.has("night_club")) && (
               <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5 inline-flex items-center gap-1">
-                🌙 Bars are only scheduled after 8:00 PM
+                🌙 Bars and nightclubs are only scheduled after 8:00 PM
+              </p>
+            )}
+            {(categories.has("museum") || categories.has("art_gallery") || categories.has("park") || categories.has("attraction")) && (
+              <p className="text-xs text-sky-600 bg-sky-50 rounded-lg px-3 py-1.5 inline-flex items-center gap-1">
+                ℹ️ Museum/park/activity data requires a fresh data fetch — see README for instructions
               </p>
             )}
           </div>
@@ -349,12 +367,20 @@ export default function Home() {
             <h2 className="text-xl font-bold text-slate-800 px-1">
               Your Itinerary — {DAYS[dayOfWeek]}, {LOCATION_LABELS[location as LocationKey]}
             </h2>
-            <p className="text-sm text-slate-500 px-1 mb-4">
+            <p className="text-sm text-slate-500 px-1">
               {itinerary[0].estimated_arrival} → {itinerary[itinerary.length - 1].estimated_departure}
               {" · "}{itinerary.length} stop{itinerary.length !== 1 ? "s" : ""}
             </p>
 
-            <div className="space-y-1">
+            {/* AI-generated day summary */}
+            {summary && (
+              <div className="bg-[#003B5C]/5 border border-[#003B5C]/10 rounded-xl px-4 py-3 flex gap-3 items-start">
+                <span className="text-lg mt-0.5">✨</span>
+                <p className="text-sm text-slate-700 leading-relaxed">{summary}</p>
+              </div>
+            )}
+
+            <div className="space-y-1 pt-1">
               {itinerary.map((stop, idx) => (
                 <div key={stop.stop_number}>
                   {/* Walk divider between stops */}
@@ -394,24 +420,52 @@ export default function Home() {
                         </div>
                       </div>
 
+                      {/* AI reason */}
+                      {stop.ai_reason && (
+                        <p className="text-sm text-slate-600 italic leading-snug border-l-2 border-[#FFD100] pl-3">
+                          {stop.ai_reason}
+                        </p>
+                      )}
+
                       {/* Address */}
                       <p className="text-sm text-slate-500 leading-snug">{stop.address}</p>
 
-                      {/* Metro info */}
+                      {/* Metro info with live predictions */}
                       {stop.nearest_metro_station && (
-                        <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 rounded-lg px-3 py-2">
-                          <span>🚇</span>
-                          <span className="font-medium">{stop.nearest_metro_station}</span>
-                          {stop.nearest_metro_distance_meters != null && (
-                            <span className="text-slate-400">
-                              ({Math.round(stop.nearest_metro_distance_meters)} m)
-                            </span>
-                          )}
-                          {stop.nearest_metro_route_codes.length > 0 && (
-                            <span className="text-slate-400 text-xs ml-auto">
-                              Lines {stop.nearest_metro_route_codes.join(", ")}
-                            </span>
-                          )}
+                        <div className="bg-slate-50 rounded-lg px-3 py-2 space-y-1.5">
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <span>🚇</span>
+                            <span className="font-medium">{stop.nearest_metro_station}</span>
+                            {stop.nearest_metro_distance_meters != null && (
+                              <span className="text-slate-400 text-xs">
+                                {Math.round(stop.nearest_metro_distance_meters)} m away
+                              </span>
+                            )}
+                          </div>
+                          {stop.metro_predictions.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 pl-6">
+                              {stop.metro_predictions.map((p, pi) => (
+                                <span
+                                  key={pi}
+                                  className="inline-flex items-center gap-1 text-xs bg-white border border-slate-200 rounded-full px-2.5 py-1 text-slate-700"
+                                >
+                                  <span className="font-semibold text-[#2774AE]">
+                                    Route {p.route_id}
+                                  </span>
+                                  {p.direction && (
+                                    <span className="text-slate-400">· {p.direction}</span>
+                                  )}
+                                  <span className="font-medium text-emerald-600">
+                                    {p.minutes === 0 ? "arriving now" : `${p.minutes} min`}
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          ) : stop.nearest_metro_route_codes.length > 0 ? (
+                            <p className="text-xs text-slate-400 pl-6">
+                              Lines {stop.nearest_metro_route_codes.join(", ")} · live times unavailable
+                            </p>
+                          ) : null}
                         </div>
                       )}
 
@@ -436,7 +490,7 @@ export default function Home() {
             <div className="pt-4 text-center">
               <button
                 type="button"
-                onClick={() => setItinerary(null)}
+                onClick={() => { setItinerary(null); setSummary(null); }}
                 className="text-slate-400 text-sm hover:text-slate-600 underline"
               >
                 Plan a different day
@@ -447,7 +501,7 @@ export default function Home() {
       </main>
 
       <footer className="text-center py-8 text-slate-400 text-xs">
-        BruinQuest · UCLA Data Science Union · Powered by Google Maps & Yelp data
+        BruinQuest · UCLA Data Science Union · RAG-powered by Claude · Data from Google Maps, Yelp & LA Metro
       </footer>
     </div>
   );
