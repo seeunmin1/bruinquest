@@ -38,7 +38,10 @@ LA_NEIGHBORHOODS = {
     "manhattan_beach": "Manhattan Beach, CA",
 }
 
-DEFAULT_CATEGORIES = ["restaurants", "cafes", "bars", "coffee", "bakeries"]
+DEFAULT_CATEGORIES = [
+    "restaurants", "cafes", "bars", "coffee", "bakeries",
+    "museums", "arts", "galleries", "parks", "amusements", "nightlife",
+]
 
 
 def search_businesses(location, categories, offset=0):

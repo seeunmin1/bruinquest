@@ -1,3 +1,9 @@
+export interface MetroPrediction {
+  route_id: string;
+  minutes: number;
+  direction: string;
+}
+
 export interface HoursPeriod {
   open: { day: number; time: string };
   close?: { day: number; time: string };
@@ -35,6 +41,7 @@ export interface ItineraryStop {
   latitude: number;
   longitude: number;
   nearest_metro_station: string | null;
+  nearest_metro_station_id: string | null;
   nearest_metro_distance_meters: number | null;
   nearest_metro_route_codes: number[];
   estimated_arrival: string;
@@ -42,6 +49,9 @@ export interface ItineraryStop {
   arrival_hhmm: number;
   travel_from_prev_meters: number;
   detail_url: string | null;
+  // Added by RAG generation layer
+  ai_reason?: string;
+  metro_predictions: MetroPrediction[];
 }
 
 export interface ItineraryRequest {
@@ -95,6 +105,11 @@ export const DWELL_MINUTES: Record<string, number> = {
   cafe: 30,
   bar: 90,
   bakery: 20,
+  museum: 90,
+  art_gallery: 45,
+  park: 60,
+  attraction: 75,
+  night_club: 120,
 };
 
 export const WALKING_SPEED_MPS = 1.4;

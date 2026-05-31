@@ -95,6 +95,10 @@ export function locationToCoords(location: string): [number, number] {
   return LOCATION_ALIASES[key] ?? LOCATION_ALIASES["ucla"];
 }
 
+function hhmmToMins(hhmm: number): number {
+  return Math.floor(hhmm / 100) * 60 + hhmm % 100;
+}
+
 export function planItinerary(
   places: Place[],
   req: ItineraryRequest
@@ -103,14 +107,20 @@ export function planItinerary(
 
   if (!categories || categories.length === 0) return [];
 
+  const endHHMM = endTime ? parseTimeToHHMM(endTime) : null;
+  const startHHMM = parseTimeToHHMM(startTime);
+
+  // When endTime is set, compute per-slot minimum arrival so numStops are spread
+  // evenly across the full window instead of crammed at the start.
+  const windowMins = endHHMM !== null ? hhmmToMins(endHHMM) - hhmmToMins(startHHMM) : null;
+  const slotMins = windowMins !== null ? windowMins / numStops : null;
+
   const categorySequence = Array.from(
     { length: numStops },
     (_, i) => categories[i % categories.length]
   );
 
-  const endHHMM = endTime ? parseTimeToHHMM(endTime) : null;
-
-  let currentHHMM = parseTimeToHHMM(startTime);
+  let currentHHMM = startHHMM;
   let [currentLat, currentLng] = locationToCoords(location);
   const usedIds = new Set<string>();
   const itinerary: ItineraryStop[] = [];
@@ -118,8 +128,13 @@ export function planItinerary(
   for (let i = 0; i < categorySequence.length; i++) {
     const category = categorySequence[i];
 
-    // Estimate arrival at nearest candidate to get a time check
-    // We'll compute arrival per candidate since distance varies
+    // Minimum arrival time for this slot index — pushes later stops forward in the day
+    const minSlotHHMM = slotMins !== null
+      ? addMinutesToHHMM(startHHMM, Math.floor(i * slotMins))
+      : null;
+    // Effective departure point in time: actual time from previous stop, or slot minimum
+    const fromHHMM = minSlotHHMM !== null ? Math.max(currentHHMM, minSlotHHMM) : currentHHMM;
+
     const candidates: Array<{ dist: number; place: Place; arrivalHHMM: number }> = [];
 
     for (const place of places) {
@@ -140,10 +155,11 @@ export function planItinerary(
 
       const dist = haversine(currentLat, currentLng, place.latitude, place.longitude);
       const travelSecs = dist / WALKING_SPEED_MPS;
-      const arrivalHHMM = addSecondsToHHMM(currentHHMM, travelSecs);
+      const arrivalHHMM = addSecondsToHHMM(fromHHMM, travelSecs);
 
       // Bar/club rule: no bars before 8 PM
       if (category === "bar" && arrivalHHMM < BAR_EARLIEST_HHMM) continue;
+      if (category === "night_club" && arrivalHHMM < BAR_EARLIEST_HHMM) continue;
 
       // Hours check
       if (!isOpenAt(place.hours_periods, dayOfWeek, arrivalHHMM)) continue;
@@ -180,8 +196,10 @@ export function planItinerary(
       latitude: place.latitude,
       longitude: place.longitude,
       nearest_metro_station: place.nearest_metro_station_name,
+      nearest_metro_station_id: place.nearest_metro_station_id,
       nearest_metro_distance_meters: place.nearest_metro_distance_meters,
       nearest_metro_route_codes: place.nearest_metro_route_codes ?? [],
+      metro_predictions: [],
       estimated_arrival: formatHHMM(arrivalHHMM),
       estimated_departure: formatHHMM(departureHHMM),
       arrival_hhmm: arrivalHHMM,

@@ -11,6 +11,7 @@ YELP_CATEGORY_MAP = {
     "cafes": "cafe",
     "bars": "bar",
     "wine_bars": "bar",
+    "cocktailbars": "bar",
     "bakeries": "bakery",
     "bagels": "bakery",
     "donuts": "bakery",
@@ -30,6 +31,38 @@ YELP_CATEGORY_MAP = {
     "seafood": "restaurant",
     "bbq": "restaurant",
     "burgers": "restaurant",
+    # Museums & cultural
+    "museums": "museum",
+    "art_museums": "museum",
+    "sciencemuseums": "museum",
+    "historicalmuseums": "museum",
+    "childrenmuseum": "museum",
+    # Galleries
+    "galleries": "art_gallery",
+    "artgalleries": "art_gallery",
+    # Outdoors & parks
+    "parks": "park",
+    "hiking": "park",
+    "beaches": "park",
+    "botanicalgardens": "park",
+    "recreation": "park",
+    # Attractions & activities
+    "arts": "attraction",
+    "amusementparks": "attraction",
+    "arcades": "attraction",
+    "escape_games": "attraction",
+    "bowling": "attraction",
+    "movietheaters": "attraction",
+    "zoos": "attraction",
+    "aquariums": "attraction",
+    "tours": "attraction",
+    # Nightlife
+    "nightlife": "night_club",
+    "danceclubs": "night_club",
+    "musicvenues": "night_club",
+    "jazzandblues": "night_club",
+    "comedyclubs": "night_club",
+    "lounges": "night_club",
 }
 
 
@@ -45,8 +78,18 @@ def map_yelp_place_type(categories):
             return "cafe"
         if "bar" in alias:
             return "bar"
-        if "bakery" in alias:
+        if "bakery" in alias or "pastry" in alias:
             return "bakery"
+        if "museum" in alias:
+            return "museum"
+        if "gallery" in alias or "galleries" in alias:
+            return "art_gallery"
+        if "park" in alias or "garden" in alias or "nature" in alias:
+            return "park"
+        if "club" in alias or "nightlife" in alias or "lounge" in alias:
+            return "night_club"
+        if "attraction" in alias or "amusement" in alias or "arcade" in alias or "theater" in alias:
+            return "attraction"
 
     return None
 
