@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 
 RAW_DIR = Path(__file__).parent.parent / "data/raw/yelp"
+# Legacy path used by earlier fetch script
+_LEGACY_YELP_PATH = Path(__file__).parent.parent / "data/raw/google_maps/raw_yelp.json"
 
 YELP_CATEGORY_MAP = {
     "restaurants": "restaurant",
@@ -95,11 +97,15 @@ def map_yelp_place_type(categories):
 
 
 def load_yelp_places(base_dir: Path = RAW_DIR):
-    if not base_dir.exists():
-        raise FileNotFoundError(f"Yelp raw directory not found: {base_dir}")
+    # Collect all JSON paths: new-style dir + legacy single file
+    json_paths = sorted(base_dir.glob("*.json")) if base_dir.exists() else []
+    if _LEGACY_YELP_PATH.exists():
+        json_paths = [_LEGACY_YELP_PATH] + [p for p in json_paths if p != _LEGACY_YELP_PATH]
+    if not json_paths:
+        raise FileNotFoundError(f"No Yelp data found in {base_dir} or {_LEGACY_YELP_PATH}")
 
     places = []
-    for path in sorted(base_dir.glob("*.json")):
+    for path in json_paths:
         with path.open("r", encoding="utf-8") as f:
             raw = json.load(f)
 
