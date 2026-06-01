@@ -36,10 +36,10 @@ const TYPE_COLOR_CLASS: Record<string, string> = {
 };
 
 const EXAMPLE_QUERIES = [
-  "Start in Koreatown — I want a budget-friendly food crawl with the best Korean spots",
-  "Start in Hollywood on a Saturday night — bars and live music after 8pm, late-night bites",
-  "Start in Silver Lake on a slow Sunday — good coffee, maybe an art gallery, cozy dinner to end",
-  "Start in Santa Monica — afternoon outdoors, a bakery stop, drinks at sunset",
+  "A slow Sunday morning in Silver Lake — good coffee, maybe an art gallery, ending with dinner somewhere cozy",
+  "Saturday night in Hollywood: bars, live music, and late-night bites after 8pm",
+  "Afternoon in Santa Monica — outdoor stuff, a bakery stop, and somewhere to grab drinks at sunset",
+  "Koreatown food crawl on Friday, all the best spots, budget-friendly",
 ];
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
