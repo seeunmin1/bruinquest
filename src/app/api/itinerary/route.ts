@@ -38,7 +38,7 @@ async function generateNarrative(
 
   const prompt = `You are BruinQuest, an LA day-trip assistant. This app uses RAG: a retrieval system pulled these venues from a database of 10,000+ real LA places based on the user's preferences, and you are the generation layer — your job is to add a human, engaging narrative to the retrieved results.
 
-User's plan:
+${req.query ? `User's own words: "${req.query}"\n` : ""}User's plan:
 - Neighborhood: ${req.location}
 - Day: ${DAYS[req.dayOfWeek]}
 - Time: ${req.startTime}${req.endTime ? ` to ${req.endTime}` : ""}
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as Partial<ItineraryRequest>;
 
-    const { location, dayOfWeek, startTime, endTime, categories, priceLevels, minRating, numStops } = body;
+    const { location, dayOfWeek, startTime, endTime, categories, priceLevels, minRating, numStops, query } = body;
 
     if (!location || dayOfWeek == null || !startTime || !categories?.length || !numStops) {
       return NextResponse.json(
@@ -94,12 +94,13 @@ export async function POST(req: NextRequest) {
       priceLevels,
       minRating,
       numStops,
+      query,
     });
 
     // Enrich in parallel: live Metro predictions + Claude narrative generation
     const [metroResults, aiResult] = await Promise.all([
       Promise.all(itinerary.map((stop) => fetchStopPredictions(stop.nearest_metro_station_id))),
-      generateNarrative(itinerary, { location, dayOfWeek, startTime, endTime, categories, priceLevels, minRating, numStops }),
+      generateNarrative(itinerary, { location, dayOfWeek, startTime, endTime, categories, priceLevels, minRating, numStops, query }),
     ]);
 
     // Merge predictions and AI reasons into stops

@@ -63,6 +63,7 @@ export interface ItineraryRequest {
   priceLevels?: number[];
   minRating?: number;
   numStops: number;
+  query?: string; // optional natural language description from user
 }
 
 export type LocationKey =

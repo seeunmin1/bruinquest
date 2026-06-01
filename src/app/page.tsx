@@ -6,6 +6,8 @@ import { LOCATION_ALIASES, LOCATION_LABELS, LocationKey, ItineraryStop } from "@
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
 const CATEGORIES = [
@@ -33,11 +35,20 @@ const TYPE_COLOR_CLASS: Record<string, string> = {
   park:"bg-green-400", attraction:"bg-teal-400", night_club:"bg-indigo-400",
 };
 
+const EXAMPLE_QUERIES = [
+  "A slow Sunday morning in Silver Lake — good coffee, maybe an art gallery, ending with dinner somewhere cozy",
+  "Saturday night in Hollywood: bars, live music, and late-night bites after 8pm",
+  "Afternoon in Santa Monica — outdoor stuff, a bakery stop, and somewhere to grab drinks at sunset",
+  "Koreatown food crawl on Friday, all the best spots, budget-friendly",
+];
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
 function StarRating({ rating }: { rating: number | null }) {
   if (!rating) return <span className="text-slate-400 text-xs">No rating</span>;
   return (
     <span className="flex items-center gap-1">
-      <span className="text-amber-400 text-xs">{"★".repeat(Math.floor(rating))}{"☆".repeat(5 - Math.floor(rating))}</span>
+      <span className="text-amber-400 text-xs">{"★".repeat(Math.floor(rating))}{"☆".repeat(5-Math.floor(rating))}</span>
       <span className="text-slate-500 text-xs font-semibold">{rating.toFixed(1)}</span>
     </span>
   );
@@ -46,7 +57,7 @@ function StarRating({ rating }: { rating: number | null }) {
 function WalkDivider({ meters }: { meters: number }) {
   const mins = Math.max(1, Math.round(meters / 1.4 / 60));
   return (
-    <div className="flex items-center gap-2 py-2 px-2">
+    <div className="flex items-center gap-2 py-2">
       <div className="flex-1 border-t border-dashed border-slate-200" />
       <span className="text-slate-400 text-xs whitespace-nowrap font-medium">
         🚶 {meters >= 1000 ? `${(meters/1000).toFixed(1)} km` : `${meters} m`} · ~{mins} min
@@ -57,12 +68,96 @@ function WalkDivider({ meters }: { meters: number }) {
 }
 
 function Label({ children }: { children: React.ReactNode }) {
+  return <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">{children}</p>;
+}
+
+// ─── Landing Screen ──────────────────────────────────────────────────────────
+
+function LandingScreen({ onReady }: { onReady: (query: string) => void }) {
+  const [query, setQuery] = useState("");
+
   return (
-    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">{children}</p>
+    <div className="min-h-screen flex flex-col" style={{ background: "#F7F6F3" }}>
+
+      {/* Hero */}
+      <div className="relative overflow-hidden px-6 pt-16 pb-12 text-center flex-shrink-0"
+        style={{ background: "linear-gradient(135deg,#003B5C 0%,#2774AE 65%,#1a5fa8 100%)" }}>
+        <div className="absolute -left-12 -top-12 w-64 h-64 rounded-full opacity-5" style={{ background:"#FFD100" }} />
+        <div className="absolute -right-8 top-8 w-40 h-40 rounded-full opacity-10" style={{ background:"#FFD100" }} />
+        <div className="relative">
+          <div className="text-6xl mb-4">🐻</div>
+          <h1 className="text-white font-extrabold text-4xl tracking-tight leading-none">BruinQuest</h1>
+          <p className="mt-2 font-semibold text-sm" style={{ color:"#FFD100", letterSpacing:"0.1em" }}>
+            AI-POWERED LA DAY PLANNER
+          </p>
+          <p className="mt-4 text-white/70 text-sm max-w-sm mx-auto leading-relaxed">
+            Tell us what kind of day you're after. We'll search 8,800+ real LA venues and build your perfect itinerary.
+          </p>
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="px-5 py-8 max-w-lg mx-auto w-full">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">How it works</p>
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {[
+            { icon:"💬", step:"1", title:"You describe", body:"Write what you're after in plain English (vibe, neighborhood, time of day, etc.)" },
+            { icon:"🔍", step:"2", title:"We retrieve", body:"Our system searches 8,800+ real LA venues and filters to the best matches for your day." },
+            { icon:"✨", step:"3", title:"Claude narrates", body:"AI adds context, timing, transit info, and a reason why each stop fits your vibe." },
+          ].map(({ icon, step, title, body }) => (
+            <div key={step} className="bg-white rounded-2xl p-3.5 text-center shadow-sm" style={{ border:"1px solid #EBEBEB" }}>
+              <div className="text-2xl mb-2">{icon}</div>
+              <p className="font-bold text-slate-800 text-xs mb-1">{title}</p>
+              <p className="text-slate-400 text-xs leading-relaxed">{body}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* NL query input */}
+        <div className="mb-4">
+          <Label>Describe your ideal day</Label>
+          <textarea
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            rows={3}
+            placeholder="e.g. &quot;Start in Westwood on a chill Saturday — good coffee, maybe an art gallery, dinner with a nice vibe&quot;"
+            className="w-full rounded-2xl bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-300 shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE] resize-none leading-relaxed font-medium"
+          />
+        </div>
+
+        {/* Example prompts */}
+        <div className="mb-6">
+          <Label>Try one of these</Label>
+          <div className="space-y-2">
+            {EXAMPLE_QUERIES.map((q) => (
+              <button key={q} type="button" onClick={() => setQuery(q)}
+                className="w-full text-left text-xs text-slate-600 bg-white rounded-xl px-3.5 py-2.5 shadow-sm ring-1 ring-slate-200 hover:ring-[#2774AE] hover:text-[#2774AE] transition-all font-medium leading-relaxed">
+                "{q}"
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <button onClick={() => onReady(query)}
+          className="w-full py-4 rounded-2xl font-extrabold text-base tracking-wide shadow-lg active:scale-[0.99] transition-all"
+          style={{ background:"#FFD100", color:"#003B5C" }}>
+          I'm Ready to Explore LA →
+        </button>
+        <p className="text-center text-xs text-slate-400 mt-3">
+          You'll be able to fine-tune filters on the next screen
+        </p>
+      </div>
+    </div>
   );
 }
 
+// ─── Planner Screen ───────────────────────────────────────────────────────────
+
 export default function Home() {
+  const [screen, setScreen]           = useState<"home" | "plan">("home");
+  const [nlQuery, setNlQuery]         = useState("");
+
   const [location, setLocation]       = useState<LocationKey>("ucla");
   const [dayOfWeek, setDayOfWeek]     = useState(new Date().getDay());
   const [startTime, setStartTime]     = useState("12:00");
@@ -71,6 +166,7 @@ export default function Home() {
   const [priceLevels, setPriceLevels] = useState<Set<number>>(new Set());
   const [minRating, setMinRating]     = useState(3.5);
   const [numStops, setNumStops]       = useState(3);
+
   const [loading, setLoading]         = useState(false);
   const [itinerary, setItinerary]     = useState<ItineraryStop[] | null>(null);
   const [summary, setSummary]         = useState<string | null>(null);
@@ -78,9 +174,10 @@ export default function Home() {
 
   const mapCenter = LOCATION_ALIASES[location] ?? LOCATION_ALIASES["ucla"];
 
-  const toggle = (set: Set<string>, key: string) => {
-    const next = new Set(set); next.has(key) ? next.delete(key) : next.add(key); return next;
-  };
+  function handleReady(query: string) {
+    setNlQuery(query);
+    setScreen("plan");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,6 +194,7 @@ export default function Home() {
           priceLevels: priceLevels.size ? Array.from(priceLevels) : undefined,
           minRating: minRating > 0 ? minRating : undefined,
           numStops,
+          query: nlQuery.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -111,41 +209,63 @@ export default function Home() {
     }
   }
 
-  return (
-    <div className="md:flex md:h-screen md:overflow-hidden" style={{ background: "#F7F6F3" }}>
+  // ── Landing screen
+  if (screen === "home") return <LandingScreen onReady={handleReady} />;
 
-      {/* ── Left panel ── */}
+  // ── Planner screen
+  return (
+    <div className="md:flex md:h-screen md:overflow-hidden" style={{ background:"#F7F6F3" }}>
+
+      {/* Left panel */}
       <div className="md:w-[44%] md:h-screen md:overflow-y-auto flex flex-col">
 
         {/* Header */}
-        <header className="relative overflow-hidden px-6 py-5 flex-shrink-0"
-          style={{ background: "linear-gradient(135deg,#003B5C 0%,#2774AE 60%,#1a5fa8 100%)" }}>
-          {/* Subtle circle decoration */}
-          <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10"
-            style={{ background: "#FFD100" }} />
-          <div className="absolute -right-2 top-10 w-20 h-20 rounded-full opacity-5"
-            style={{ background: "#FFD100" }} />
+        <header className="relative overflow-hidden px-5 py-4 flex-shrink-0 flex items-center justify-between"
+          style={{ background:"linear-gradient(135deg,#003B5C 0%,#2774AE 60%,#1a5fa8 100%)" }}>
+          <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full opacity-10" style={{ background:"#FFD100" }} />
           <div className="relative flex items-center gap-3">
-            <span className="text-4xl">🐻</span>
+            <span className="text-3xl">🐻</span>
             <div>
-              <h1 className="text-white font-extrabold text-2xl tracking-tight leading-none">BruinQuest</h1>
-              <p className="mt-0.5 font-semibold text-xs" style={{ color: "#FFD100", letterSpacing: "0.08em" }}>
+              <h1 className="text-white font-extrabold text-xl tracking-tight leading-none">BruinQuest</h1>
+              <p className="mt-0.5 font-semibold text-xs" style={{ color:"#FFD100", letterSpacing:"0.08em" }}>
                 YOUR PERFECT LA DAY
               </p>
             </div>
           </div>
+          <button onClick={() => setScreen("home")}
+            className="relative text-white/60 hover:text-white text-xs font-semibold transition-colors">
+            ← Back
+          </button>
         </header>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-5 py-5 space-y-5 flex-1">
+        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4 flex-1">
 
-          {/* Where + When */}
+          {/* Natural language query */}
+          <div>
+            <Label>Your vibe</Label>
+            <textarea
+              value={nlQuery}
+              onChange={e => setNlQuery(e.target.value)}
+              rows={2}
+              placeholder="Describe what you're after — Claude will use this to personalise your itinerary…"
+              className="w-full rounded-xl bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-300 shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE] resize-none leading-relaxed font-medium"
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 border-t border-slate-200" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Fine-tune filters</span>
+            <div className="flex-1 border-t border-slate-200" />
+          </div>
+
+          {/* Location + Day */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>📍 Neighborhood</Label>
               <select value={location} onChange={e => setLocation(e.target.value as LocationKey)}
                 className="w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE]">
-                {Object.entries(LOCATION_LABELS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                {Object.entries(LOCATION_LABELS).map(([k,l]) => <option key={k} value={k}>{l}</option>)}
               </select>
             </div>
             <div>
@@ -173,16 +293,19 @@ export default function Home() {
 
           {/* Categories */}
           <div>
-            <Label>What are you after?</Label>
+            <Label>What do you want?</Label>
             {!categories.size && <p className="text-xs text-red-500 mb-1">Pick at least one</p>}
             <div className="flex flex-wrap gap-1.5">
               {CATEGORIES.map(({ key, label, icon }) => {
                 const on = categories.has(key);
                 return (
-                  <button key={key} type="button" onClick={() => setCategories(toggle(categories, key))}
+                  <button key={key} type="button"
+                    onClick={() => {
+                      const n = new Set(categories); on ? n.delete(key) : n.add(key); setCategories(n);
+                    }}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-150
                       ${on ? "text-white shadow-md" : "bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 hover:ring-[#2774AE] hover:text-[#2774AE]"}`}
-                    style={on ? { background: "linear-gradient(135deg,#2774AE,#1a5fa8)" } : {}}>
+                    style={on ? { background:"linear-gradient(135deg,#2774AE,#1a5fa8)" } : {}}>
                     {icon} {label}
                   </button>
                 );
@@ -190,7 +313,7 @@ export default function Home() {
             </div>
             {(categories.has("bar") || categories.has("night_club")) && (
               <p className="mt-2 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-1.5 inline-block">
-                🌙 Bars & nightclubs scheduled after 8 PM only
+                🌙 Bars & nightclubs after 8 PM only
               </p>
             )}
           </div>
@@ -203,9 +326,8 @@ export default function Home() {
                 {[1,2,3,4].map(lv => {
                   const on = priceLevels.has(lv);
                   return (
-                    <button key={lv} type="button" onClick={() => {
-                      const n = new Set(priceLevels); on ? n.delete(lv) : n.add(lv); setPriceLevels(n);
-                    }}
+                    <button key={lv} type="button"
+                      onClick={() => { const n = new Set(priceLevels); on ? n.delete(lv) : n.add(lv); setPriceLevels(n); }}
                       className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all
                         ${on ? "bg-emerald-600 text-white shadow-md" : "bg-white text-slate-500 shadow-sm ring-1 ring-slate-200 hover:ring-emerald-400"}`}>
                       {PRICE_LABELS[lv]}
@@ -237,7 +359,7 @@ export default function Home() {
           {/* Submit */}
           <button type="submit" disabled={loading || !categories.size}
             className="w-full py-3.5 rounded-2xl font-bold text-sm tracking-wide transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-[0.99]"
-            style={{ background: loading || !categories.size ? "#ccc" : "#FFD100", color: "#003B5C" }}>
+            style={{ background: loading || !categories.size ? "#ccc" : "#FFD100", color:"#003B5C" }}>
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -250,12 +372,12 @@ export default function Home() {
           </button>
 
           {error && (
-            <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ background: "#FFF0F0", color: "#b91c1c" }}>
+            <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ background:"#FFF0F0", color:"#b91c1c" }}>
               {error}
             </div>
           )}
 
-          {/* ── Results ── */}
+          {/* Results */}
           {itinerary && itinerary.length > 0 && (
             <section className="space-y-1 pb-8">
               <div className="flex items-baseline justify-between pt-1 pb-0.5">
@@ -268,7 +390,7 @@ export default function Home() {
 
               {summary && (
                 <div className="rounded-2xl px-4 py-3 flex gap-2.5 items-start mb-4"
-                  style={{ background: "linear-gradient(135deg,rgba(39,116,174,0.07),rgba(0,59,92,0.04))", border: "1px solid rgba(39,116,174,0.12)" }}>
+                  style={{ background:"linear-gradient(135deg,rgba(39,116,174,0.07),rgba(0,59,92,0.04))", border:"1px solid rgba(39,116,174,0.12)" }}>
                   <span className="mt-0.5 flex-shrink-0">✨</span>
                   <p className="text-xs text-slate-700 leading-relaxed">{summary}</p>
                 </div>
@@ -278,10 +400,8 @@ export default function Home() {
                 {itinerary.map((stop, idx) => (
                   <div key={stop.stop_number}>
                     {idx > 0 && stop.travel_from_prev_meters > 0 && <WalkDivider meters={stop.travel_from_prev_meters}/>}
-
-                    <div className="bg-white rounded-2xl shadow-sm overflow-hidden" style={{ border: "1px solid #EBEBEB" }}>
+                    <div className="bg-white rounded-2xl shadow-sm overflow-hidden" style={{ border:"1px solid #EBEBEB" }}>
                       <div className="px-4 py-3 space-y-2.5">
-                        {/* Stop number + time */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className={`w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center ${TYPE_COLOR_CLASS[stop.place_type] ?? "bg-slate-400"}`}>
@@ -294,7 +414,6 @@ export default function Home() {
                           </span>
                         </div>
 
-                        {/* Name + rating */}
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2 min-w-0">
                             <span className="text-xl flex-shrink-0">{PLACE_ICONS[stop.place_type]}</span>
@@ -309,7 +428,6 @@ export default function Home() {
                           </div>
                         </div>
 
-                        {/* AI reason */}
                         {stop.ai_reason && (
                           <p className="text-xs text-slate-600 leading-relaxed pl-2.5 border-l-[3px] border-[#FFD100] italic">
                             {stop.ai_reason}
@@ -318,9 +436,8 @@ export default function Home() {
 
                         <p className="text-xs text-slate-400">{stop.address}</p>
 
-                        {/* Metro */}
                         {stop.nearest_metro_station && (
-                          <div className="rounded-xl px-3 py-2 space-y-1.5" style={{ background: "#F7F6F3" }}>
+                          <div className="rounded-xl px-3 py-2 space-y-1.5" style={{ background:"#F7F6F3" }}>
                             <div className="flex items-center gap-1.5 text-xs text-slate-600">
                               <span>🚇</span>
                               <span className="font-semibold">{stop.nearest_metro_station}</span>
@@ -358,6 +475,11 @@ export default function Home() {
               <div className="pt-4 text-center">
                 <button type="button" onClick={() => { setItinerary(null); setSummary(null); }}
                   className="text-slate-400 text-xs hover:text-slate-600 underline">
+                  Try different filters
+                </button>
+                <span className="text-slate-300 mx-2">·</span>
+                <button type="button" onClick={() => { setItinerary(null); setSummary(null); setScreen("home"); }}
+                  className="text-slate-400 text-xs hover:text-slate-600 underline">
                   Start over
                 </button>
               </div>
@@ -366,18 +488,17 @@ export default function Home() {
         </form>
 
         <footer className="text-center py-3 text-slate-400 text-xs border-t border-slate-100 flex-shrink-0"
-          style={{ background: "#F7F6F3" }}>
+          style={{ background:"#F7F6F3" }}>
           BruinQuest · UCLA DSU · RAG-powered by Claude
         </footer>
       </div>
 
-      {/* ── Map panel ── */}
+      {/* Map panel */}
       <div className="h-56 md:flex-1 md:h-screen relative">
         <MapView center={mapCenter} stops={itinerary ?? []}/>
-
         {itinerary && itinerary.length > 0 && (
           <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl px-3 py-2.5 space-y-1.5 z-[1000]"
-            style={{ border: "1px solid #EBEBEB" }}>
+            style={{ border:"1px solid #EBEBEB" }}>
             {itinerary.map(stop => (
               <div key={stop.stop_number} className="flex items-center gap-2 text-xs">
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 ${TYPE_COLOR_CLASS[stop.place_type] ?? "bg-slate-400"}`}>
