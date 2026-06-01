@@ -36,10 +36,10 @@ const TYPE_COLOR_CLASS: Record<string, string> = {
 };
 
 const EXAMPLE_QUERIES = [
-  "A slow Sunday morning in Silver Lake — good coffee, maybe an art gallery, ending with dinner somewhere cozy",
-  "Saturday night in Hollywood: bars, live music, and late-night bites after 8pm",
-  "Afternoon in Santa Monica — outdoor stuff, a bakery stop, and somewhere to grab drinks at sunset",
-  "Koreatown food crawl on Friday, all the best spots, budget-friendly",
+  "Start in Koreatown — I want a budget-friendly food crawl with the best Korean spots",
+  "Start in Hollywood on a Saturday night — bars and live music after 8pm, late-night bites",
+  "Start in Silver Lake on a slow Sunday — good coffee, maybe an art gallery, cozy dinner to end",
+  "Start in Santa Monica — afternoon outdoors, a bakery stop, drinks at sunset",
 ];
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ function LandingScreen({ onReady }: { onReady: (query: string) => void }) {
         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">How it works</p>
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { icon:"💬", step:"1", title:"You describe", body:"Write what you're after in plain English — vibe, neighborhood, time of day, anything." },
+            { icon:"💬", step:"1", title:"You describe", body:"Write what you're after in plain English (vibe, neighborhood, time of day, etc.)" },
             { icon:"🔍", step:"2", title:"We retrieve", body:"Our system searches 8,800+ real LA venues and filters to the best matches for your day." },
             { icon:"✨", step:"3", title:"Claude narrates", body:"AI adds context, timing, transit info, and a reason why each stop fits your vibe." },
           ].map(({ icon, step, title, body }) => (
@@ -120,7 +120,7 @@ function LandingScreen({ onReady }: { onReady: (query: string) => void }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             rows={3}
-            placeholder="e.g. &quot;A chill Saturday in Westwood — good coffee in the morning, maybe browse an art gallery, then dinner somewhere with a nice vibe&quot;"
+            placeholder="e.g. &quot;Start in Westwood on a chill Saturday — good coffee, maybe an art gallery, dinner with a nice vibe&quot;"
             className="w-full rounded-2xl bg-white px-4 py-3 text-sm text-slate-800 placeholder-slate-300 shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE] resize-none leading-relaxed font-medium"
           />
         </div>
