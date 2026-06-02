@@ -67,13 +67,23 @@ function WalkDivider({ meters }: { meters: number }) {
   );
 }
 
-function Label({ children }: { children: React.ReactNode }) {
-  return <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">{children}</p>;
+function Label({ children, autofilled }: { children: React.ReactNode; autofilled?: boolean }) {
+  return (
+    <div className="flex items-center gap-1.5 mb-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{children}</p>
+      {autofilled && (
+        <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+          style={{ background:"#FFF7CC", color:"#92700A" }}>
+          ✨ auto-filled
+        </span>
+      )}
+    </div>
+  );
 }
 
 // ─── Landing Screen ──────────────────────────────────────────────────────────
 
-function LandingScreen({ onReady }: { onReady: (query: string) => void }) {
+function LandingScreen({ onReady, parsing }: { onReady: (query: string) => void; parsing: boolean }) {
   const [query, setQuery] = useState("");
 
   return (
@@ -139,13 +149,21 @@ function LandingScreen({ onReady }: { onReady: (query: string) => void }) {
         </div>
 
         {/* CTA */}
-        <button onClick={() => onReady(query)}
-          className="w-full py-4 rounded-2xl font-extrabold text-base tracking-wide shadow-lg active:scale-[0.99] transition-all"
+        <button onClick={() => onReady(query)} disabled={parsing}
+          className="w-full py-4 rounded-2xl font-extrabold text-base tracking-wide shadow-lg active:scale-[0.99] transition-all disabled:opacity-70"
           style={{ background:"#FFD100", color:"#003B5C" }}>
-          I'm Ready to Explore LA →
+          {parsing ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+              Reading your vibe…
+            </span>
+          ) : "I'm Ready to Explore LA →"}
         </button>
         <p className="text-center text-xs text-slate-400 mt-3">
-          You'll be able to fine-tune filters on the next screen
+          We'll read your description and pre-fill the filters for you
         </p>
       </div>
     </div>
@@ -157,6 +175,8 @@ function LandingScreen({ onReady }: { onReady: (query: string) => void }) {
 export default function Home() {
   const [screen, setScreen]           = useState<"home" | "plan">("home");
   const [nlQuery, setNlQuery]         = useState("");
+  const [parsedFields, setParsedFields] = useState<Set<string>>(new Set());
+  const [parsing, setParsing]         = useState(false);
 
   const [location, setLocation]       = useState<LocationKey>("ucla");
   const [dayOfWeek, setDayOfWeek]     = useState(new Date().getDay());
@@ -174,8 +194,30 @@ export default function Home() {
 
   const mapCenter = LOCATION_ALIASES[location] ?? LOCATION_ALIASES["ucla"];
 
-  function handleReady(query: string) {
+  async function handleReady(query: string) {
     setNlQuery(query);
+    if (query.trim()) {
+      setParsing(true);
+      try {
+        const res = await fetch("/api/parse-query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+        if (res.ok) {
+          const parsed = await res.json();
+          const filled = new Set<string>();
+          if (parsed.location)              { setLocation(parsed.location);              filled.add("location"); }
+          if (parsed.dayOfWeek != null)     { setDayOfWeek(parsed.dayOfWeek);            filled.add("dayOfWeek"); }
+          if (parsed.startTime)             { setStartTime(parsed.startTime);            filled.add("startTime"); }
+          if (parsed.endTime)               { setEndTime(parsed.endTime);                filled.add("endTime"); }
+          if (parsed.categories?.length)    { setCategories(new Set(parsed.categories)); filled.add("categories"); }
+          if (parsed.numStops)              { setNumStops(parsed.numStops);              filled.add("numStops"); }
+          setParsedFields(filled);
+        }
+      } catch { /* degrade silently */ }
+      finally { setParsing(false); }
+    }
     setScreen("plan");
   }
 
@@ -210,7 +252,7 @@ export default function Home() {
   }
 
   // ── Landing screen
-  if (screen === "home") return <LandingScreen onReady={handleReady} />;
+  if (screen === "home") return <LandingScreen onReady={handleReady} parsing={parsing} />;
 
   // ── Planner screen
   return (
@@ -262,16 +304,16 @@ export default function Home() {
           {/* Location + Day */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>📍 Neighborhood</Label>
-              <select value={location} onChange={e => setLocation(e.target.value as LocationKey)}
-                className="w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE]">
+              <Label autofilled={parsedFields.has("location")}>📍 Neighborhood</Label>
+              <select value={location} onChange={e => { setLocation(e.target.value as LocationKey); setParsedFields(f => { const n=new Set(f); n.delete("location"); return n; }); }}
+                className={`w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2774AE] ${parsedFields.has("location") ? "ring-2 ring-[#FFD100]" : "ring-1 ring-slate-200"}`}>
                 {Object.entries(LOCATION_LABELS).map(([k,l]) => <option key={k} value={k}>{l}</option>)}
               </select>
             </div>
             <div>
-              <Label>📅 Day</Label>
-              <select value={dayOfWeek} onChange={e => setDayOfWeek(Number(e.target.value))}
-                className="w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE]">
+              <Label autofilled={parsedFields.has("dayOfWeek")}>📅 Day</Label>
+              <select value={dayOfWeek} onChange={e => { setDayOfWeek(Number(e.target.value)); setParsedFields(f => { const n=new Set(f); n.delete("dayOfWeek"); return n; }); }}
+                className={`w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2774AE] ${parsedFields.has("dayOfWeek") ? "ring-2 ring-[#FFD100]" : "ring-1 ring-slate-200"}`}>
                 {DAYS.map((d,i) => <option key={d} value={i}>{d}</option>)}
               </select>
             </div>
@@ -280,20 +322,20 @@ export default function Home() {
           {/* Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>🕐 Start time</Label>
-              <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} required
-                className="w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE]" />
+              <Label autofilled={parsedFields.has("startTime")}>🕐 Start time</Label>
+              <input type="time" value={startTime} onChange={e => { setStartTime(e.target.value); setParsedFields(f => { const n=new Set(f); n.delete("startTime"); return n; }); }} required
+                className={`w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2774AE] ${parsedFields.has("startTime") ? "ring-2 ring-[#FFD100]" : "ring-1 ring-slate-200"}`} />
             </div>
             <div>
-              <Label>🕙 End time <span className="normal-case font-normal text-slate-400">(optional)</span></Label>
-              <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
-                className="w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2774AE]" />
+              <Label autofilled={parsedFields.has("endTime")}>🕙 End time <span className="normal-case font-normal text-slate-400">(optional)</span></Label>
+              <input type="time" value={endTime} onChange={e => { setEndTime(e.target.value); setParsedFields(f => { const n=new Set(f); n.delete("endTime"); return n; }); }}
+                className={`w-full rounded-xl border-0 bg-white px-3 py-2.5 text-slate-800 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2774AE] ${parsedFields.has("endTime") ? "ring-2 ring-[#FFD100]" : "ring-1 ring-slate-200"}`} />
             </div>
           </div>
 
           {/* Categories */}
           <div>
-            <Label>What do you want?</Label>
+            <Label autofilled={parsedFields.has("categories")}>What do you want?</Label>
             {!categories.size && <p className="text-xs text-red-500 mb-1">Pick at least one</p>}
             <div className="flex flex-wrap gap-1.5">
               {CATEGORIES.map(({ key, label, icon }) => {
@@ -478,7 +520,7 @@ export default function Home() {
                   Try different filters
                 </button>
                 <span className="text-slate-300 mx-2">·</span>
-                <button type="button" onClick={() => { setItinerary(null); setSummary(null); setScreen("home"); }}
+                <button type="button" onClick={() => { setItinerary(null); setSummary(null); setParsedFields(new Set()); setScreen("home"); }}
                   className="text-slate-400 text-xs hover:text-slate-600 underline">
                   Start over
                 </button>
