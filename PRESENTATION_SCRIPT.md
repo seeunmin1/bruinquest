@@ -59,9 +59,11 @@ One thing we're proud of here is the **schedule distribution fix**. Early on, if
 
 **Step two is Augmentation.** This is the "A" in RAG, and it's what separates RAG from just calling an LLM directly. The retrieved stops — name, type, rating, address, arrival and departure time — get packaged into a structured prompt that also includes the user's original natural language description. So the model never has to guess what's in LA or invent places from training data. Everything it talks about was retrieved from our knowledge base first. The model's context is *augmented* with real, verified information before it generates a single word.
 
-**Step three is Generation.** Claude — specifically Claude Haiku, which is fast and cost-efficient for this task — reads that augmented prompt and writes a two-sentence summary of the overall day and a one-sentence reason for each stop, specific to the rating, the neighborhood, the time of day, and how it flows from the previous stop.
+**Step three is Generation.** Claude — specifically Claude Haiku, which is fast and cost-efficient — reads that augmented prompt and writes a two-sentence summary of the overall day and a one-sentence reason for each stop.
 
-This is the key RAG guarantee: the model can only narrate places that were actually retrieved. It cannot hallucinate a venue that doesn't exist in our dataset. The NLP parsing shapes the query, retrieval finds the places, augmentation grounds the prompt, and generation adds the voice.
+Now, where do those reasons come from? The *facts* — the place name, the rating, the arrival time — come entirely from the retrieved data. Claude cannot invent those. But the *reasoning* — why a four-point-six star cafe fits a slow Sunday morning, why this neighborhood flows into the next stop, what "dinner vibe" actually implies — that draws on what the model learned during training. Claude understands neighborhoods, ratings in context, and time of day in a way that no database query can.
+
+This is exactly the power of RAG: you get factual accuracy from retrieval, and contextual intelligence from trained knowledge. Neither alone is enough. A database query can find a highly-rated restaurant near you, but it can't tell you why it's the right call at six PM after a long afternoon in Koreatown. And a language model alone might write you something beautiful — about a restaurant that doesn't exist. RAG gives you both. The NLP parsing shapes the query, retrieval finds the places, augmentation grounds the prompt, and generation adds the voice.
 
 [PAUSE]
 
