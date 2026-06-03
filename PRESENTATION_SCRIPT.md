@@ -43,33 +43,25 @@ And we found a bug in this process worth mentioning. The Yelp data had been sitt
 
 Now, the core of the system. BruinQuest is built as a **Retrieval-Augmented Generation** pipeline — RAG. That's a specific AI architecture where a language model's output is grounded in real data that gets retrieved at query time, rather than relying purely on what the model knows from training.
 
-Here's how ours works:
+Our pipeline has four steps. A pre-step, then the three classic RAG layers.
 
-**Step one is Retrieval.** When you hit "Plan My Day," the system runs your structured preferences — neighborhood, time window, categories, price level, minimum rating — against the full 8,885-place knowledge base. It uses a greedy nearest-neighbor algorithm: starting from your selected neighborhood, it finds the closest qualifying venue for each stop, checking that it's open at your arrival time and that you'd depart before your end time.
+**Pre-step: NLP Query Parsing.** We didn't want people filling in eight dropdown fields to get started. So when you type something like "Koreatown dinner outing, three hours" on the landing screen and click I'm Ready — before the app even transitions to the planning screen — it fires a Claude call to parse that sentence into structured data.
 
-One thing we're proud of here is the **schedule distribution fix**. Early on, if you said "three stops, noon to ten PM," the planner would cram all three stops into the first three hours and leave the rest of the day empty. We fixed this by computing a minimum start time per slot — dividing your time window evenly and enforcing that each stop can't start before its slot opens. Now three stops from noon to ten PM are spread at noon, three-twenty, and six-forty.
+Claude extracts the neighborhood, the day if mentioned, a start time, an end time, and the relevant categories. "Dinner" becomes six PM. "Three hours" means nine PM end time. "Koreatown" maps to the koreatown location key. When the planning screen loads, every field that was inferred from your description is pre-filled with a gold border and an "auto-filled" badge — so you can see exactly what the system understood, and override anything before continuing.
 
-**Step two is Augmentation.** This is the "A" in RAG, and it's what separates RAG from just calling an LLM directly. The retrieved stops — name, type, rating, address, arrival and departure time — get formatted into a structured prompt that also includes the user's original natural language description. So the model never has to guess what's in LA or invent places from training data. Everything it talks about was retrieved from our knowledge base first. The model's context is *augmented* with real, verified information before it generates a single word.
-
-**Step three is Generation.** Now Claude — specifically Claude Haiku, which is fast and cost-efficient for this task — reads that augmented prompt and writes a two-sentence summary of the overall day and a one-sentence reason for each stop, specific to the rating, the neighborhood, the time of day, and how it flows from the previous stop.
-
-This is the key RAG guarantee: the model can only narrate places that were actually retrieved. It cannot hallucinate a venue that doesn't exist in our dataset. Retrieval handles the *what*, augmentation handles the *context*, and generation handles the *why*.
+This step is what bridges natural language to the retrieval layer. Your words get translated into precise filters before a single venue is looked up.
 
 [PAUSE]
 
----
+**Step one is Retrieval.** Now, with those structured preferences in hand — neighborhood, time window, categories, price level, minimum rating — the system searches the full 8,885-place knowledge base. It uses a greedy nearest-neighbor algorithm: starting from your selected neighborhood, it finds the closest qualifying venue for each stop, checking that it's open at your arrival time and that you'd depart before your end time.
 
-## Natural Language Query Parsing
+One thing we're proud of here is the **schedule distribution fix**. Early on, if you said "three stops, noon to ten PM," the planner would cram all three stops into the first three hours and leave the rest of the day empty. We fixed this by computing a minimum start time per slot — dividing your time window evenly and enforcing that each stop can't start before its slot opens. Now three stops from noon to ten PM are spread at noon, three-twenty, and six-forty.
 
-Here's where it gets interesting for the user experience.
+**Step two is Augmentation.** This is the "A" in RAG, and it's what separates RAG from just calling an LLM directly. The retrieved stops — name, type, rating, address, arrival and departure time — get packaged into a structured prompt that also includes the user's original natural language description. So the model never has to guess what's in LA or invent places from training data. Everything it talks about was retrieved from our knowledge base first. The model's context is *augmented* with real, verified information before it generates a single word.
 
-We didn't want people to have to fill in eight dropdown fields to get started. So when you type something like "Koreatown dinner outing, three hours" on the landing screen and click I'm Ready — before the app even transitions to the planning screen, it makes a second Claude call to *parse* that sentence.
+**Step three is Generation.** Claude — specifically Claude Haiku, which is fast and cost-efficient for this task — reads that augmented prompt and writes a two-sentence summary of the overall day and a one-sentence reason for each stop, specific to the rating, the neighborhood, the time of day, and how it flows from the previous stop.
 
-Claude reads your description and extracts: the neighborhood, the day if mentioned, a start time, an end time, and the relevant categories. "Dinner" becomes six PM, "three hours" means nine PM end time, "Koreatown" maps to the koreatown location key.
-
-When the planning screen loads, every field that was inferred from your description is pre-filled with a gold border and an "auto-filled" badge. You can see exactly what the system understood, and you can override anything before you hit Plan My Day.
-
-This is what makes it genuinely RAG — the natural language query isn't just sent to the generation layer. It shapes the *retrieval* inputs too. Your words change what places get retrieved.
+This is the key RAG guarantee: the model can only narrate places that were actually retrieved. It cannot hallucinate a venue that doesn't exist in our dataset. The NLP parsing shapes the query, retrieval finds the places, augmentation grounds the prompt, and generation adds the voice.
 
 [PAUSE]
 
