@@ -69,13 +69,15 @@ This is exactly the power of RAG: you get factual accuracy from retrieval, and c
 
 ---
 
-## Live Transit Integration
+## Live Transit Enrichment
 
-Each stop in the itinerary shows the nearest metro station and the distance to it.
+One thing worth being clear about: this next piece is not part of the RAG pipeline. It runs alongside it, in parallel, once the stops are known.
 
-But we also integrated the **LA Metro real-time API**. At the moment you generate an itinerary, the server makes a live call to the Metro predictions endpoint for each stop's nearest station, in parallel. If the API responds in time — it has a three-second timeout — you see pills like "Route 33 · arriving in 8 minutes" right on the card.
+Once retrieval has identified which venues to include, each place in our knowledge base already has its nearest metro station pre-computed — name, distance, and route codes. That's static enrichment we baked in during preprocessing.
 
-This is all server-side, so there are no CORS issues, no browser exposure, and no extra API key needed. If the Metro API is down or slow, it degrades silently and just shows the static route codes.
+But we went one step further and integrated the **LA Metro real-time API**. The moment the retrieval step locks in a stop, the server fires a live call to the Metro predictions endpoint for that stop's nearest station — all stops in parallel. If the API responds within three seconds, you see pills on the card like "Route 33 · arriving in 8 minutes." If it's slow or down, it degrades silently back to the static route codes.
+
+No part of this touches the RAG layers. It's pure operational enrichment — real-world data bolted on after the itinerary is assembled, server-side, with no extra API key needed.
 
 [PAUSE]
 
