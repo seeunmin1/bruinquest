@@ -49,9 +49,11 @@ Here's how ours works:
 
 One thing we're proud of here is the **schedule distribution fix**. Early on, if you said "three stops, noon to ten PM," the planner would cram all three stops into the first three hours and leave the rest of the day empty. We fixed this by computing a minimum start time per slot — dividing your time window evenly and enforcing that each stop can't start before its slot opens. Now three stops from noon to ten PM are spread at noon, three-twenty, and six-forty.
 
-**Step two is Generation.** After retrieval, we pass the selected stops to Claude — specifically Claude Haiku, which is fast and cost-efficient for this task. Claude receives the list of retrieved venues plus any natural language description the user typed, and it writes a two-sentence summary of the overall day and a one-sentence reason for each stop — specific to the rating, the neighborhood, the time of day, and the sequence.
+**Step two is Augmentation.** This is the "A" in RAG, and it's what separates RAG from just calling an LLM directly. The retrieved stops — name, type, rating, address, arrival and departure time — get formatted into a structured prompt that also includes the user's original natural language description. So the model never has to guess what's in LA or invent places from training data. Everything it talks about was retrieved from our knowledge base first. The model's context is *augmented* with real, verified information before it generates a single word.
 
-This is the key RAG insight: retrieval handles the *what* using efficient filters, generation handles the *why* using language understanding.
+**Step three is Generation.** Now Claude — specifically Claude Haiku, which is fast and cost-efficient for this task — reads that augmented prompt and writes a two-sentence summary of the overall day and a one-sentence reason for each stop, specific to the rating, the neighborhood, the time of day, and how it flows from the previous stop.
+
+This is the key RAG guarantee: the model can only narrate places that were actually retrieved. It cannot hallucinate a venue that doesn't exist in our dataset. Retrieval handles the *what*, augmentation handles the *context*, and generation handles the *why*.
 
 [PAUSE]
 
